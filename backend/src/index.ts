@@ -5,13 +5,21 @@ import mongoose from "mongoose";
 import userRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import MyHotelRoutes from "./routes/my-hotels";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
 
 main()
   .then(() => {
     console.log("connected to DB");
   })
   .catch((err) => console.log(err));
-
 async function main() {
   await mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string);
 }
@@ -26,8 +34,11 @@ app.use(
   })
 );
 
+app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/my-hotels", MyHotelRoutes);
 
 app.listen(7000, () => {
   console.log("Server is running on localhost:7000");
